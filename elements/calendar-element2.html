@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="import" href="../bower_components/polymer/polymer.html">
+    <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+</head>
+
+<body>
+    <dom-module id="calendar-element2">
+        <template>
+            <style include="iron-flex iron-flex-alignment">
+                .dateBox {
+                    background-color: cadetblue;
+                    border: 1px solid black;
+                    width: 40px;
+                    height: 40px;
+                    line-height:40px;;
+                }
+                .boundingbox{
+                    width:294px;
+                }
+            </style>
+            <div class="boundingbox layout horizontal wrap">
+                <template is="dom-repeat" items="{{dayOfWeekArray}}">
+                    <div class="dateBox layout vertical center">
+                        <div>{{item.day}}</div>
+                    </div>
+                </template>
+                <template is="dom-repeat" items="{{dateArray}}">
+                    <div class="dateBox layout vertical center">
+                        <div>{{item.date}}</div>
+                    </div>
+                </template>
+            </div>
+        </template>
+        <script>
+            Polymer({
+                is : 'calendar-element2',
+                ready : function(){
+                    this.dayOfWeekArray = [];
+                    this.dateArray = [];
+                    this.createCalendar();
+                },
+                createCalendar : function (){
+                    this.dayOfWeekArray = [];
+                    this.dateArray = [];
+                    
+                    var day = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                    for(var x=0;x<day.length;x++){
+                        this.push('dayOfWeekArray',{day:day[x]});
+                    }
+                    
+                    var date = 0;
+                    for(var y=0;y<6;y++){
+                        for(var x=0;x<7;x++){
+                            date++;
+                            this.push('dateArray',{date:date});
+                        }
+                    }
+                }
+            });
+        </script>
+    </dom-module>
+</body>
+</html>

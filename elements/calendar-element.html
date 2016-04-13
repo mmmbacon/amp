@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link rel="import" href="../bower_components/polymer/polymer.html">
+    <link rel="import" href="../bower_components/paper-material/paper-material.html">
+    <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+    <script src="../bower_components/moment/moment.js"></script>
+</head>
+
+<body>
+    <dom-module id="calendar-element">
+        <template>
+            <style include="iron-flex iron-flex-alignment">
+                .button:hover {
+                    cursor:pointer;
+                }
+                .calendarBox {
+                    padding:10px;
+                }
+                .dateBox {
+                    width:12%;
+                    min-width: 100px;
+                    min-height:100px;
+                    margin:2px;
+                    padding:5px;
+                    background-color: white;
+                    font-size: 10pt;
+                }
+                .titleBox {
+                    color: white;
+                    justify-content: center;
+                    font-size: 30px;
+                    height:35px;
+                    margin:3px;
+                    padding:5px;
+                    background: #3f51b5;
+                }
+                .dateHeading {
+                    color: white;
+                    background: #3f51b5;
+                    padding-right:5px;
+                    margin-bottom:5px;
+                }
+                
+            </style>
+            
+            
+            <div class="calendarBox layout vertical center-justify">
+                
+                <!--heading-->
+                <paper-material class="titleBox layout horizontal center-justify">
+                    <span class="button" id="decrease" on-tap="handleTap">< </span>
+                    <span id="currentMonth">&nbsp;{{month}}&nbsp;</span>
+                    <span class="button" id="increase" on-tap="handleTap"> ></span>
+                </paper-material>
+                
+                <!--main calendar-->
+                    <div class="layout horizontal wrap">
+                        <template is="dom-repeat" items="{{daysArray}}">
+                            <paper-material class="dateBox">
+                                <paper-material class="dateHeading layout horizontal end-justified">{{item.date}}</paper-material>
+                                <div>Day Info: Something Happening This day</div>
+                            </paper-material>
+                        </template>
+                    </div>
+            </div>
+        </template>
+        <script>
+            
+            var displayMonth = moment();
+            var daysInMonth = displayMonth.daysInMonth();
+            
+            Polymer({
+                is : 'calendar-element',
+                created : function(){
+                    
+                },
+                ready : function(){
+                    this.month = displayMonth.format('MMMM');
+                    this.daysInMonth = daysInMonth;
+                    this.daysArray = [];
+                    this.addDatesToCalendar(daysInMonth);
+
+                },
+                listeners : {
+                    'increase.tap' : 'handleTap',
+                    'decrease.tap' : 'handleTap'
+                },
+                handleTap : function(e){
+                    if(e.srcElement.id == "increase"){
+                        displayMonth.add(1,'month');
+                        this.daysInMonth = displayMonth.daysInMonth();
+                        this.month = displayMonth.format('MMMM');
+                        this.addDatesToCalendar(this.daysInMonth);
+                    }else{
+                        displayMonth.subtract(1,'month');
+                        this.daysInMonth = displayMonth.daysInMonth();
+                        this.month = displayMonth.format('MMMM');
+                        this.addDatesToCalendar(this.daysInMonth);
+                    }
+                },
+                addDatesToCalendar : function(dim){
+                    this.daysArray = [];
+                    for(var x = 1; x < dim+1; x++){
+                        this.push('daysArray',{date:x})
+                    }
+                }
+            })
+        </script>
+    </dom-module>
+</body>
+</html>
