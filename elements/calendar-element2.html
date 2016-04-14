@@ -6,6 +6,7 @@
     <title></title>
     <link rel="import" href="../bower_components/polymer/polymer.html">
     <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+    <script src="../bower_components/moment/moment.js"></script>
 </head>
 
 <body>
@@ -23,6 +24,7 @@
                     width:294px;
                 }
             </style>
+            <div>{{firstDayOfMonth}}</div>
             <div class="boundingbox layout horizontal wrap">
                 <template is="dom-repeat" items="{{dayOfWeekArray}}">
                     <div class="dateBox layout vertical center">
@@ -43,6 +45,12 @@
                     this.dayOfWeekArray = [];
                     this.dateArray = [];
                     this.createCalendar();
+                    
+                    this.currentYear = moment().year();
+                    this.currentMonth = moment().month();
+                    this.currentDate = moment().date();
+                    this.currentDay = moment().day();
+                    this.firstDayOfMonth = this.getFirstDayOfCurrentMonth();
                 },
                 createCalendar : function (){
                     this.dayOfWeekArray = [];
@@ -60,6 +68,15 @@
                             this.push('dateArray',{date:date});
                         }
                     }
+                },
+                getFirstDayOfCurrentMonth : function(){
+                    return this.currentMonth.date(1);
+                },
+                nextMonth : function(){
+                    this.currentMonth++;
+                },
+                prevMonth : function(){
+                    this.currentMonth--;
                 }
             });
         </script>
