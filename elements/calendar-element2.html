@@ -6,77 +6,244 @@
     <title></title>
     <link rel="import" href="../bower_components/polymer/polymer.html">
     <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+    <link rel="import" href="../bower_components/paper-material/paper-material.html">
+    <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+    
     <script src="../bower_components/moment/moment.js"></script>
 </head>
 
 <body>
     <dom-module id="calendar-element2">
         <template>
-            <style include="iron-flex iron-flex-alignment">
-                .dateBox {
-                    background-color: cadetblue;
-                    border: 1px solid black;
+            <style is="custom-style" include="iron-flex iron-flex-alignment">
+                
+                @keyframes transition {
+                    0% {
+                        background-color: cadetblue;
+                    }
+                    100% {
+                        background-color: darkcyan;
+                    }
+                }
+                @keyframes rectangletocircle {
+                    0% {
+                        border-radius:0px;
+                    }
+                    100% {
+                        border-radius:20px;
+                    }
+                }
+                .dayBox {
+                    color: white;
+                    background-color: darkcyan;
                     width: 40px;
                     height: 40px;
-                    line-height:40px;;
+                    line-height:40px;
+                    font: "Arial";
+                    margin:1px;
                 }
+                .dayBox {
+                    color: white;
+                    background-color: darkcyan;
+                    width: 40px;
+                    height: 40px;
+                    line-height:40px;
+                    font: "Arial";
+                    margin:1px;
+                }
+                .dateBox {
+                    background-color: cadetblue;
+                    width: 40px;
+                    height: 40px;
+                    line-height:40px;
+                    margin:1px;
+                }
+                .dateBox:hover{
+                    animation-name: transition;
+                    animation-duration: 0.2s;
+                    background-color: darkcyan;
+                    cursor: pointer;
+                }
+                .dateBox:active{
+                    animation-name: rectangletocircle;
+                    animation-duration: 0.05s;
+                    border-radius: 20px;
+                }
+                
                 .boundingbox{
+                    /*display: inline-block;*/
                     width:294px;
+                    padding:5px;
+                }
+                .outerbox {
+                    /*display: inline-block;*/
+                    padding:5px;
+                    width:300px;
+                    /*border: 1px solid black;*/
+                }
+                .heading {
+                    color: white;
+                    background-color: darkcyan;
+                    height: 40px;
+                    line-height: 40px;
+                    width: 292px;
+                    margin:0px;
+                }
+                .datechange:hover {
+                    cursor: pointer;
+                    color: beige;
+                }
+                #weekendbox {
+                    color: gainsboro;
+                }
+                #notmonthbox {
+                    color: beige;
                 }
             </style>
-            <div>{{firstDayOfMonth}}</div>
-            <div class="boundingbox layout horizontal wrap">
-                <template is="dom-repeat" items="{{dayOfWeekArray}}">
-                    <div class="dateBox layout vertical center">
-                        <div>{{item.day}}</div>
-                    </div>
-                </template>
-                <template is="dom-repeat" items="{{dateArray}}">
-                    <div class="dateBox layout vertical center">
-                        <div>{{item.date}}</div>
-                    </div>
-                </template>
-            </div>
+            
+            <paper-material class="outerbox layout vertical center">
+                <div class="layout horizontal center-justified">
+                    <paper-material class="heading layout horizontal">
+                        <paper-icon-button id="decrease" class="datechange layout horizontal end-justified" on-tap="decreaseMonth" icon="arrow-back"><&nbsp</paper-icon-button>
+                        <span class="flex"><div class="layout horizontal center-justified">{{currentMonth}}&nbsp;{{currentYear}}</div>{{currentMonth}}</span>
+                        <paper-icon-button id="increase" class="datechange layout horizontal end-justified" on-tap="increaseMonth" icon="arrow-forward">&nbsp></paper-icon-button>
+                    </paper-material>
+                </div>
+                <div class="boundingbox layout horizontal wrap">
+                    <template is="dom-repeat" items="{{dayOfWeekArray}}">
+                        <paper-material class="dayBox layout vertical center">
+                            <div>{{item.day}}</div>
+                        </paper-material>
+                    </template>
+                    <template is="dom-repeat" items="{{dateArray}}">
+                        <paper-material class="dateBox layout vertical center">
+                            <div>{{item.date}}</div>
+                        </paper-material>
+                    </template>
+                </div>
+            </paper-material>
         </template>
         <script>
+            
+            var YEAR = moment().year();
+            var MONTH = 0;
+            var DATE = 1;
+            var DAY = 1
+            
+            
+            
             Polymer({
                 is : 'calendar-element2',
                 ready : function(){
                     this.dayOfWeekArray = [];
                     this.dateArray = [];
-                    this.createCalendar();
                     
+                    this.currentYear = moment().year(YEAR).format('YYYY');
+                    this.currentMonth = moment().month(MONTH).format('MMMM').toUpperCase();
+                    this.currentDate = moment().date(DATE);
+                    this.currentDay = moment().day(DAY);
+                    
+                    this.firstDayOfMonth = this.getFirstDayOfCurrentMonth(YEAR, MONTH);
+                    this.lastDateOfMonth;
+                    this.daysInMonth;
+                    
+                    this.buildMonth = [];
+                
+                    this.getFirstDayOfCurrentMonth(YEAR,MONTH);
+                    
+                    //Init Calendar
+                    this.createCalendar();
+                    console.log(MONTH);
+                    
+                    //Test
+                    this.moment = moment();
+                    this.moment.set({'year':moment().year(), 'month':moment().month(),'date': moment().date()});
+                    console.log(this.moment.year());
+                    console.log(this.moment.month());
+                    console.log(this.moment.date());
+                },
+                listeners : {
+                    'decrease.tap' : 'decreaseMonth',
+                    'increase.tap' : 'increaseMonth'
+                },
+                decreaseMonth : function(e){
+                    MONTH--;
+                    this.moment.subtract(1,'month');
+                    this.currentMonth = moment().month(MONTH).format('MMMM').toUpperCase();
+                    this.createCalendar();
+                        console.log(this.moment.year());
+                        console.log(this.moment.month());
+                        console.log(this.moment.date());
+                },
+                increaseMonth : function(e){
+                    MONTH++;
+                    this.moment.add(1,'month');
                     this.currentYear = moment().year();
-                    this.currentMonth = moment().month();
-                    this.currentDate = moment().date();
-                    this.currentDay = moment().day();
-                    this.firstDayOfMonth = this.getFirstDayOfCurrentMonth();
+                    this.currentMonth = moment().month(MONTH).format('MMMM').toUpperCase();
+                    this.createCalendar();
+                        console.log(this.moment.year());
+                        console.log(this.moment.month());
+                        console.log(this.moment.date());
+                },
+                debug : function(msg){
+                    console.log(msg);
                 },
                 createCalendar : function (){
+                    
+                    this.getFirstDayOfCurrentMonth(YEAR,MONTH);
                     this.dayOfWeekArray = [];
                     this.dateArray = [];
                     
-                    var day = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+                    //Build Graphical Days of week
+                    var day = [
+                        moment().day(0).format('ddd'),
+                        moment().day(1).format('ddd'),
+                        moment().day(2).format('ddd'),
+                        moment().day(3).format('ddd'),
+                        moment().day(4).format('ddd'),
+                        moment().day(5).format('ddd'),
+                        moment().day(6).format('ddd')
+                    ];
                     for(var x=0;x<day.length;x++){
                         this.push('dayOfWeekArray',{day:day[x]});
                     }
                     
-                    var date = 0;
+                    //Build Graphical Calendar
+                    var position = 0;
+                    var difference = this.firstDayOfMonth - position;
+                    var date = moment().date(1).subtract(difference, 'days');
+                    
+                    //Build Graphical Dates
                     for(var y=0;y<6;y++){
                         for(var x=0;x<7;x++){
-                            date++;
-                            this.push('dateArray',{date:date});
+                            
+                            difference = this.firstDayOfMonth - position;
+                            date = moment().date(1).subtract(difference, 'days');
+                            
+                            if(this.firstDayOfMonth == position){
+                                this.push('dateArray',{date: moment().date(1).format('D')});
+                            }else{
+                                this.push('dateArray',{date: date.format('D') })
+                            }
+                            position++;
                         }
                     }
+                    
+                    
                 },
-                getFirstDayOfCurrentMonth : function(){
-                    return this.currentMonth.date(1);
+                calculateDates : function(){
+                    //get first day of month position in array
+                    //calculate days previous to the first day of month
+                    //get last day of month position in array
+                    //calculate days after the last day of month. 
+                    // There are a set number of weeks per calendar display month
+                    // " " days per calendar display week.
+                    
+                    
                 },
-                nextMonth : function(){
-                    this.currentMonth++;
-                },
-                prevMonth : function(){
-                    this.currentMonth--;
+                getFirstDayOfCurrentMonth : function(year, month){
+                    this.firstDayOfMonth = moment().year(year).month(month).date(1).format('d');
                 }
             });
         </script>
