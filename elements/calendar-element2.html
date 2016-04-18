@@ -18,12 +18,14 @@
         <template>
             <style is="custom-style" include="iron-flex iron-flex-alignment">
                 
+                @import url(https://fonts.googleapis.com/css?family=Hind);
+                
                 @keyframes transition {
                     0% {
                         background-color: cadetblue;
                     }
                     100% {
-                        background-color: darkcyan;
+                        background-color: #226D70;
                     }
                 }
                 @keyframes rectangletocircle {
@@ -34,6 +36,7 @@
                         border-radius:20px;
                     }
                 }
+
                 .dayBox {
                     color: white;
                     width: 41.75px;
@@ -41,21 +44,40 @@
                     line-height:40px;
                     font: "Arial";
                     margin:0px;
-                    /*border:1px solid black;*/
-                    
+                    /*border:1px solid black;*/ 
                 }
                 .dayBoxCollection {
                     color: white;
-                    background-color: darkcyan;
+                    background-color: #226D70;
                     width: 294px;
                     height: 40px;
                     line-height:40px;
                     font: "Arial";
                     margin:1px;
                     margin-bottom: 5px;
-                
                 }
                 .dateBox {
+                    background-color: cadetblue;
+                    width: 40px;
+                    height: 40px;
+                    line-height:40px;
+                    margin:1px;
+                }
+                .dateBox.light1{
+                    background-color: #93C5C7;
+                    width: 40px;
+                    height: 40px;
+                    line-height:40px;
+                    margin:1px;
+                }
+                .dateBox.light2{
+                    background-color: #C9E4E7;
+                    width: 40px;
+                    height: 40px;
+                    line-height:40px;
+                    margin:1px;
+                }
+                .dateBox.dark{
                     background-color: cadetblue;
                     width: 40px;
                     height: 40px;
@@ -65,13 +87,14 @@
                 .dateBox:hover{
                     animation-name: transition;
                     animation-duration: 0.2s;
-                    background-color: darkcyan;
+                    background-color: #226D70;
                     cursor: pointer;
                 }
                 .dateBox:active{
                     animation-name: rectangletocircle;
                     animation-duration: 0.05s;
                     border-radius: 20px;
+                    background-color: #226D70;
                 }
                 
                 .boundingbox{
@@ -79,15 +102,17 @@
                     width:294px;
                     padding:5px;
                 }
+                
                 .outerbox {
                     /*display: inline-block;*/
                     padding:5px;
                     width:300px;
                     /*border: 1px solid black;*/
                 }
+                
                 .heading {
                     color: white;
-                    background-color: darkcyan;
+                    background-color: #226D70;
                     height: 40px;
                     line-height: 40px;
                     width: 292px;
@@ -97,15 +122,42 @@
                     cursor: pointer;
                     color: beige;
                 }
-                #weekendbox {
-                    color: gainsboro;
+                .detailBox.default {
+                    display: none;
+                    background-color: cadetblue;
+                    margin:1px;
+                    margin-top:5px;
+                    width: 292px;
+                    padding: 7px;
                 }
-                #notmonthbox {
-                    color: beige;
+                .detailBox.closed {
+                    visibility: hidden;
+                    max-height: 0px;
+                    transition: max-height 1s cubic-bezier(.4,.86,.07,.99);
+                    color: white;
+                    background-color: cadetblue;
+                    margin:1px;
+                    margin-top:5px;
+                    width: 292px;
+                    padding: 7px;
                 }
+                .detailBox.open {
+                    visibility: visible;
+                    max-height: 220px;
+                    overflow: hidden;
+                    transition: max-height 1s cubic-bezier(.4,.86,.07,.99);
+                    color: white;
+                    background-color: cadetblue;
+                    visibility: visible;
+                    margin:1px;
+                    margin-top:5px;
+                    width: 292px;
+                    padding: 7px;
+                }
+                
             </style>
             
-            <paper-material class="outerbox layout vertical center">
+            <paper-material class$="outerbox {{outerboxState}} layout vertical center" id="outerbox">
                 <div class="layout horizontal center-justified">
                     <paper-material class="heading layout horizontal">
                         <paper-icon-button id="decrease" class="datechange layout horizontal end-justified" on-tap="decreaseMonth" icon="arrow-back"><&nbsp</paper-icon-button>
@@ -113,57 +165,67 @@
                         <paper-icon-button id="increase" class="datechange layout horizontal end-justified" on-tap="increaseMonth" icon="arrow-forward">&nbsp></paper-icon-button>
                     </paper-material>
                 </div>
-                <div class="boundingbox layout horizontal wrap">
+                <div class="boundingbox layout horizontal wrap" id="boundingBox">
                      <paper-material class="dayBoxCollection layout horizontal">
                         <template is="dom-repeat" items="{{dayOfWeekArray}}">
                             <div class="dayBox layout vertical center">
-                                <div>{{item.day}}</div>
+                                {{item.day}}
                             </div>
                         </template>
                     </paper-material> 
                     <template is="dom-repeat" items="{{dateArray}}">
-                        <paper-material class="dateBox layout vertical center">
-                            <div>{{item.dateText}}</div>
+                        <paper-material class$="dateBox {{item.color}} layout vertical center" id="{{item.position}}" on-tap="dateSelected" title="{{item.dateShort}}">
+                           {{item.dateText}}
                         </paper-material>
                     </template>
+                    <paper-material class$="detailBox {{detailState}}">
+                        <b>{{currentSelectedDate}}</b>
+                        <p>Item 1</p>
+                        <p>Item 1</p>
+
+                    </paper-material>
                 </div>
             </paper-material>
         </template>
         <script>
-
+            
             Polymer({
                 is : 'calendar-element2',
                 ready : function(){
-                    this.moment = moment();
-                    this.dayOfWeekArray = [];
-                    this.dateArray = [];
-                    
-                    this.currentYear = moment().year(this.moment.year()).format("YYYY");
-                    this.currentMonth = moment().month(this.moment.month()).format("MMMM").toUpperCase();
-                    this.currentDate = moment().date(this.moment.date()).format("DDDD");
-                    this.currentDay = moment().day(this.moment.day()).format("ddd");
-
-                    this.buildMonth = [];
-                    
+                    this.init();
+                    this.setDate();
+                    this.currentSelectedDate;
                     //Init Calendar
                     this.createCalendar();
-                    
+                    this.detailState = "closed";
+                },
+                init : function(){
+                    this.moment = moment();
                 },
                 decreaseMonth : function(e){
                     this.moment.subtract(1,'month');
-                    this.currentYear = moment().year(this.moment.year()).format("YYYY");
-                    this.currentMonth = moment().month(this.moment.month()).format("MMMM").toUpperCase();
-                    this.currentDate = moment().date(this.moment.date()).format("DDDD");
-                    this.currentDay = moment().day(this.moment.day()).format("ddd");
+                    this.setDate();
                     this.createCalendar();
+                    this.hideDetails();
                 },
                 increaseMonth : function(e){
                     this.moment.add(1,'month');
-                    this.currentYear = moment().year(this.moment.year()).format("YYYY");
-                    this.currentMonth = moment().month(this.moment.month()).format("MMMM").toUpperCase();
-                    this.currentDate = moment().date(this.moment.date()).format("DDDD");
-                    this.currentDay = moment().day(this.moment.day()).format("ddd");
+                    this.setDate();
                     this.createCalendar();
+                    this.hideDetails();
+                },
+                dateSelected : function (e){
+                    this.firstDayOfMonth = moment().year(this.moment.year()).month(this.moment.month()).date(1).day();
+                    var position = parseInt(e.srcElement.id);
+                    var info = this.dateArray[position];
+                    this.currentSelectedDate = info.dateShort; // This is where we will query the database with an AJAX request in the future
+                    this.showDetails();
+                },
+                showDetails : function(){
+                        this.detailState = "open";
+                },
+                hideDetails : function(){
+                        this.detailState = "closed";
                 },
                 createCalendar : function (){
                     this.firstDayOfMonth = moment().year(this.moment.year()).month(this.moment.month()).date(1).day();
@@ -195,16 +257,85 @@
                             
                             difference = this.firstDayOfMonth - position;
                             date = moment().year(this.moment.year()).month(this.moment.month()).date(1).subtract(difference, 'days');
+                            
                             if(this.firstDayOfMonth == position){
-                                this.push('dateArray',{dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D')});
+                                if(date.month() != this.moment.month()){
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                        color : "light1",
+                                        position : position
+                                    });
+                                }else if(date.day() == 0 ){
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                        color : "light2",
+                                        position : position
+                                    });
+                                }else if(date.day() == 6 ){
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                        color : "light2",
+                                        position : position
+                                    });
+                                }else{
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                        color : "dark",
+                                        position : position
+                                    });
+                                }
                             }else{
-                                this.push('dateArray',{dateText: date.format('D') })
+                                if(date.month() != this.moment.month()){
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: date.format('D'),
+                                        color : "light1",
+                                        position : position
+                                    });
+                                }else if(date.day() == 0){
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: date.format('D'),
+                                        color : "light2",
+                                        position : position
+                                    });
+                                }else if(date.day() == 6){
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: date.format('D'),
+                                        color : "light2",
+                                        position : position
+                                    });
+                                }else{
+                                    this.push('dateArray',{
+                                        dateLong : date,
+                                        dateShort : date.format("MMMM D YYYY"),
+                                        dateText: date.format('D'),
+                                        color : "dark",
+                                        position : position
+                                    });
+                                }
                             }
                             position++;
                         }
                     }
-                    
-                    
+                },
+                setDate : function(){
+                    this.currentYear = moment().year(this.moment.year()).format("YYYY");
+                    this.currentMonth = moment().month(this.moment.month()).format("MMMM").toUpperCase();
+                    this.currentDate = moment().date(this.moment.date()).format("DDDD");
+                    this.currentDay = moment().day(this.moment.day()).format("ddd");
                 }
             });
         </script>
