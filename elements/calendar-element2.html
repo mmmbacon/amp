@@ -12,7 +12,9 @@
     <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
     <link rel="import" href="../bower_components/paper-button/paper-button.html">
     <link rel="import" href="../bower_components/paper-input/paper-input.html">
+    <link rel="import" href="../bower_components/paper-fab/paper-fab.html">
     <link rel="import" href="../bower_components/iron-form/iron-form.html">
+    <link rel="import" href="../bower_components/paper-styles/paper-styles.html">
     
     <script src="../bower_components/moment/moment.js"></script>
     <script src="../jquery-1.12.3.js"></script>
@@ -21,9 +23,7 @@
 <body>
     <dom-module id="calendar-element2">
         <template>
-            <style is="custom-style" include="iron-flex iron-flex-alignment">
-                
-                @import url(https://fonts.googleapis.com/css?family=Hind);
+            <style is="custom-style" include="iron-flex iron-flex-alignment shared-styles">
                 
                 @keyframes transition {
                     0% {
@@ -66,7 +66,6 @@
                     height: 40px;
                     line-height:40px;
                     margin:1px;
-                    user-select: none;
                 }
                 .dateBox.light1{
                     background-color: #93C5C7;
@@ -169,7 +168,7 @@
                     background-color: cadetblue;
                 }
                 .detailHeader {
-                    background-color:  cadetblue;
+                    background-color:  #226D70;
                     z-index: 2;
                 }
                 #filler {
@@ -180,8 +179,19 @@
                     color: white;
                     background-color: #226D70;
                 }
+                paper-button.submit {
+                 background-color: orangered;
+                }
                 .eventInputButtons{
                     padding:20px;
+                }
+                paper-fab {
+                    background-color: orangered;
+                    position:relative;
+                    margin:5px;
+                }
+                paper-fab.hidden {
+                    display:none;
                 }
             </style>
             
@@ -208,6 +218,7 @@
                             </paper-material>
                     </template>
                     </div>
+                    
                     <div class="detailWrap">
                         <div class$="detailBox {{detailState}}" >
                             <paper-material elevation="1" class="detailHeader layout horizontal center-justified">
@@ -215,25 +226,24 @@
                                 <span class="flex layout vertical center-center">{{currentSelectedDate}}</span>
                                 <span id="filler" ></span>
                             </paper-material>
-                            <paper-material elevation="1" class="eventWrap">
+                            <div elevation="1" class="eventWrap">
                                 <paper-material class$="newEventBox {{newEventState}} layout vertical center">
                                     <iron-form id="eventInput">
                                         <paper-input label="Event Title" id="formInput"></paper-input>
                                         <paper-input label="Date of Event" id="formInput"></paper-input>
                                         <paper-input label="Description" id="formInput"></paper-input>
                                         <div class="eventInputButtons">
-                                            <paper-button raised>Create Event</paper-button>
+                                            <paper-button class="submit" raised>Create Event</paper-button>
                                             <paper-button raised on-tap="hideNewEvent">Cancel</paper-button>
                                         </div>
                                     </iron-form>
                                 </paper-material>
-                            </paper-material>
-                            <div class="layout vertical center">
-                                <p><paper-material class="roundButton layout vertical center-center" id="addNewEventButton" animated="true"><paper-icon-button icon="add" on-tap="showNewEvent"></paper-icon-button></paper-material></p>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
+               <div><paper-fab class$="{{fabState}}" icon="add" on-tap="createNewEvent"></paper-fab></div>
             </paper-material>
         </template>
         <script>
@@ -243,20 +253,25 @@
                 ready : function(){
                     this.init();
                     this.setDate();
-                    this.currentSelectedDate;
+                    this.currentSelectedDate = "NEW EVENT";
                     //Init Calendar
                     this.createCalendar();
                     this.detailState = "closed";
                     this.newEventState = "closed";
+                    this.fabState = "visible";
                 },
                 init : function(){
                     this.moment = moment();
                 },
-                showNewEvent : function(e){
+                createNewEvent : function(e){
                     this.newEventState = "open";
+                    this.detailState = "open";
+                    this.fabState = "hidden";
                 },
                 hideNewEvent : function(e){
                     this.newEventState = "closed";
+                    this.hideDetails();
+                    this.fabState = "visible";
                 },
                 decreaseMonth : function(e){
                     this.moment.subtract(1,'month');
@@ -278,13 +293,14 @@
                     this.currentSelectedDateBox = info.dateLong;
                     this.createCalendar();
                     this.showDetails();
+                    this.fabState = "visible";
                 },
                 showDetails : function(){
                     this.detailState = "open";
                 },
                 hideDetails : function(){
                     this.detailState = "closed";
-                    this.hideNewEvent();
+                    this.fabState = "visible";
                 },
                 createCalendar : function (){
                     this.firstDayOfMonth = moment().year(this.moment.year()).month(this.moment.month()).date(1).day();
