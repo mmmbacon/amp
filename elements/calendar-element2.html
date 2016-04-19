@@ -8,9 +8,14 @@
     <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
     <link rel="import" href="../bower_components/paper-material/paper-material.html">
     <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+    <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
     <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../bower_components/paper-button/paper-button.html">
+    <link rel="import" href="../bower_components/paper-input/paper-input.html">
+    <link rel="import" href="../bower_components/iron-form/iron-form.html">
     
     <script src="../bower_components/moment/moment.js"></script>
+    <script src="../jquery-1.12.3.js"></script>
 </head>
 
 <body>
@@ -36,7 +41,6 @@
                         border-radius:20px;
                     }
                 }
-
                 .dayBox {
                     color: white;
                     width: 41.75px;
@@ -54,7 +58,7 @@
                     line-height:40px;
                     font: "Arial";
                     margin:1px;
-                    margin-bottom: 5px;
+                    margin-bottom: 6px;
                 }
                 .dateBox {
                     background-color: cadetblue;
@@ -62,27 +66,24 @@
                     height: 40px;
                     line-height:40px;
                     margin:1px;
+                    user-select: none;
                 }
                 .dateBox.light1{
                     background-color: #93C5C7;
-                    width: 40px;
-                    height: 40px;
-                    line-height:40px;
-                    margin:1px;
                 }
                 .dateBox.light2{
                     background-color: #C9E4E7;
-                    width: 40px;
-                    height: 40px;
-                    line-height:40px;
-                    margin:1px;
                 }
-                .dateBox.dark{
+                .dateBox.light3{
+                    background-color: white;
+                    border-radius:10px;
+                }
+                .dateBox.dark1{
                     background-color: cadetblue;
-                    width: 40px;
-                    height: 40px;
-                    line-height:40px;
-                    margin:1px;
+                }
+                .dateBox.dark2{
+                    background-color: #226D70;
+                    color:white;
                 }
                 .dateBox:hover{
                     animation-name: transition;
@@ -96,20 +97,20 @@
                     border-radius: 20px;
                     background-color: #226D70;
                 }
-                
                 .boundingbox{
                     /*display: inline-block;*/
                     width:294px;
                     padding:5px;
                 }
-                
                 .outerbox {
                     /*display: inline-block;*/
                     padding:5px;
+                    padding-top:9px;
                     width:300px;
+                    overflow: hidden;
+                    background-color: white;
                     /*border: 1px solid black;*/
                 }
-                
                 .heading {
                     color: white;
                     background-color: #226D70;
@@ -122,39 +123,66 @@
                     cursor: pointer;
                     color: beige;
                 }
-                .detailBox.default {
-                    display: none;
-                    background-color: cadetblue;
-                    margin:1px;
-                    margin-top:5px;
+                .detailBox {
+                    position: static;
+                    color: white;
                     width: 292px;
-                    padding: 7px;
+                    margin:1px;
                 }
                 .detailBox.closed {
-                    visibility: hidden;
-                    max-height: 0px;
-                    transition: max-height 1s cubic-bezier(.4,.86,.07,.99);
-                    color: white;
-                    background-color: cadetblue;
-                    margin:1px;
-                    margin-top:5px;
-                    width: 292px;
-                    padding: 7px;
+                    margin-top: -200%;
+                    transition: margin-top 0.5s cubic-bezier(.4,.86,.07,.99);
+                    -webkit-transition: margin-top 2s cubic-bezier(.4,.86,.07,.99);
                 }
                 .detailBox.open {
-                    visibility: visible;
-                    max-height: 220px;
-                    overflow: hidden;
-                    transition: max-height 1s cubic-bezier(.4,.86,.07,.99);
-                    color: white;
-                    background-color: cadetblue;
-                    visibility: visible;
-                    margin:1px;
-                    margin-top:5px;
-                    width: 292px;
-                    padding: 7px;
+                    margin-top: 3px;
+                    transition: margin-top 0.5s cubic-bezier(.4,.86,.07,.99);
+                    -webkit-transition: margin-top 0.5s cubic-bezier(.4,.86,.07,.99);
                 }
-                
+                .detailWrap {
+                    margin-top:5px;
+                    margin-bottom:-4px;
+                    overflow:hidden;
+                }
+                .newEventBox {
+                    background-color: white;
+                    width: 292px;
+                }
+                .newEventBox.open {
+                    margin-top: 0px;
+                    transition: margin-top 0.1s cubic-bezier(.4,.86,.07,.99);
+                    -webkit-transition: margin-top 0.5s cubic-bezier(.4,.86,.07,.99);
+                }
+                .newEventBox.closed {
+                    margin-top: -100%;
+                    transition: margin-top 0.1s cubic-bezier(.4,.86,.07,.99);
+                    -webkit-transition: margin-top 0.5s cubic-bezier(.4,.86,.07,.99);
+                }
+                .eventWrap {
+                    margin-bottom:-4px;
+                    overflow:hidden;
+                }
+                .roundButton {
+                    width:40px;
+                    height:40px;
+                    border-radius: 20px;
+                    background-color: cadetblue;
+                }
+                .detailHeader {
+                    background-color:  cadetblue;
+                    z-index: 2;
+                }
+                #filler {
+                    width:40px;
+                    height: 40px;
+                }
+                paper-button {
+                    color: white;
+                    background-color: #226D70;
+                }
+                .eventInputButtons{
+                    padding:20px;
+                }
             </style>
             
             <paper-material class$="outerbox {{outerboxState}} layout vertical center" id="outerbox">
@@ -173,17 +201,38 @@
                             </div>
                         </template>
                     </paper-material> 
-                    <template is="dom-repeat" items="{{dateArray}}">
-                        <paper-material class$="dateBox {{item.color}} layout vertical center" id="{{item.position}}" on-tap="dateSelected" title="{{item.dateShort}}">
-                           {{item.dateText}}
-                        </paper-material>
+                    <div class="dateBoxCollection layout horizontal wrap">
+                        <template is="dom-repeat" items="{{dateArray}}">
+                            <paper-material class$="dateBox {{item.color}} layout vertical center" id="{{item.position}}"  title="{{item.dateShort}}" on-tap="dateSelected">
+                                {{item.dateText}}
+                            </paper-material>
                     </template>
-                    <paper-material class$="detailBox {{detailState}}">
-                        <b>{{currentSelectedDate}}</b>
-                        <p>Item 1</p>
-                        <p>Item 1</p>
-
-                    </paper-material>
+                    </div>
+                    <div class="detailWrap">
+                        <div class$="detailBox {{detailState}}" >
+                            <paper-material elevation="1" class="detailHeader layout horizontal center-justified">
+                                <paper-icon-button class="layout horizontal left-justified" icon="expand-less" on-tap="hideDetails"></paper-icon-button>
+                                <span class="flex layout vertical center-center">{{currentSelectedDate}}</span>
+                                <span id="filler" ></span>
+                            </paper-material>
+                            <paper-material elevation="1" class="eventWrap">
+                                <paper-material class$="newEventBox {{newEventState}} layout vertical center">
+                                    <iron-form id="eventInput">
+                                        <paper-input label="Event Title" id="formInput"></paper-input>
+                                        <paper-input label="Date of Event" id="formInput"></paper-input>
+                                        <paper-input label="Description" id="formInput"></paper-input>
+                                        <div class="eventInputButtons">
+                                            <paper-button raised>Create Event</paper-button>
+                                            <paper-button raised on-tap="hideNewEvent">Cancel</paper-button>
+                                        </div>
+                                    </iron-form>
+                                </paper-material>
+                            </paper-material>
+                            <div class="layout vertical center">
+                                <p><paper-material class="roundButton layout vertical center-center" id="addNewEventButton" animated="true"><paper-icon-button icon="add" on-tap="showNewEvent"></paper-icon-button></paper-material></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </paper-material>
         </template>
@@ -198,9 +247,16 @@
                     //Init Calendar
                     this.createCalendar();
                     this.detailState = "closed";
+                    this.newEventState = "closed";
                 },
                 init : function(){
                     this.moment = moment();
+                },
+                showNewEvent : function(e){
+                    this.newEventState = "open";
+                },
+                hideNewEvent : function(e){
+                    this.newEventState = "closed";
                 },
                 decreaseMonth : function(e){
                     this.moment.subtract(1,'month');
@@ -218,14 +274,17 @@
                     this.firstDayOfMonth = moment().year(this.moment.year()).month(this.moment.month()).date(1).day();
                     var position = parseInt(e.srcElement.id);
                     var info = this.dateArray[position];
-                    this.currentSelectedDate = info.dateShort; // This is where we will query the database with an AJAX request in the future
+                    this.currentSelectedDate = info.dateShort.toUpperCase(); // This is where we will query the database with an AJAX request in the future
+                    this.currentSelectedDateBox = info.dateLong;
+                    this.createCalendar();
                     this.showDetails();
                 },
                 showDetails : function(){
-                        this.detailState = "open";
+                    this.detailState = "open";
                 },
                 hideDetails : function(){
-                        this.detailState = "closed";
+                    this.detailState = "closed";
+                    this.hideNewEvent();
                 },
                 createCalendar : function (){
                     this.firstDayOfMonth = moment().year(this.moment.year()).month(this.moment.month()).date(1).day();
@@ -260,71 +319,171 @@
                             
                             if(this.firstDayOfMonth == position){
                                 if(date.month() != this.moment.month()){
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
-                                        color : "light1",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "light1",
+                                            position : position
+                                        });
+                                    }
                                 }else if(date.day() == 0 ){
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
-                                        color : "light2",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "light2",
+                                            position : position
+                                        });
+                                    }
                                 }else if(date.day() == 6 ){
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
-                                        color : "light2",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "light2",
+                                            position : position
+                                        });
+                                    }
                                 }else{
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
-                                        color : "dark",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: moment().year(this.moment.year()).month(this.moment.month()).date(1).format('D'),
+                                            color : "light1",
+                                            position : position
+                                        });
+                                    }
                                 }
                             }else{
                                 if(date.month() != this.moment.month()){
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: date.format('D'),
-                                        color : "light1",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "light1",
+                                            position : position
+                                        });
+                                    }
                                 }else if(date.day() == 0){
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: date.format('D'),
-                                        color : "light2",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "light2",
+                                            position : position
+                                        });
+                                    }
                                 }else if(date.day() == 6){
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: date.format('D'),
-                                        color : "light2",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "light2",
+                                            position : position
+                                        });
+                                    }
+                                }else if(moment(date.format("MMMM D YYYY")).isSame(moment().format("MMMM D YYYY"))){
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "light3",
+                                            position : position
+                                        });
+                                    }
                                 }else{
-                                    this.push('dateArray',{
-                                        dateLong : date,
-                                        dateShort : date.format("MMMM D YYYY"),
-                                        dateText: date.format('D'),
-                                        color : "dark",
-                                        position : position
-                                    });
+                                    if(this.currentSelectedDateBox && moment(date.format("MMMM D YYYY")).isSame(this.currentSelectedDateBox.format("MMMM D YYYY"))){
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "dark2",
+                                            position : position
+                                        });
+                                    }else{
+                                        this.push('dateArray',{
+                                            dateLong : date,
+                                            dateShort : date.format("MMMM D YYYY"),
+                                            dateText: date.format('D'),
+                                            color : "dark1",
+                                            position : position
+                                        });
+                                        
+                                    }
+                                    
                                 }
                             }
                             position++;
